@@ -7,6 +7,10 @@ import {
   Toolbar,
   Button,
   InputBase,
+  Checkbox,
+  Stack,
+  Select,
+  MenuItem,
 } from "@mui/material";
 
 import { styled, alpha } from "@mui/material/styles";
@@ -20,6 +24,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import useAuth from "../../../../hooks/useAuth";
 import { useLocation } from "react-router-dom";
+import { useState } from "react";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -61,9 +66,34 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
+const filterOptions = [
+  {
+    title: "Today",
+    id: "today",
+  },
+  {
+    title: "Tomorrow",
+    id: "tomorrow",
+  },
+  {
+    title: "This Week",
+    id: "this-week",
+  },
+  {
+    title: "Next Week",
+    id: "next-week",
+  },
+  {
+    title: "Month",
+    id: "month",
+  },
+];
+
 const Header = ({ setOpenDrawer, view, setView }) => {
   const { resetAuth } = useAuth();
   const location = useLocation();
+  const [currentFilter, setCurrentFilter] = useState(filterOptions[0].id);
+  const [myOrderView, setMyOrderView] = useState(true);
   return (
     <AppBar
       position="fixed"
@@ -106,39 +136,64 @@ const Header = ({ setOpenDrawer, view, setView }) => {
           />
         </Search>
         <Box sx={{ flexGrow: 1 }} />
-        <Box display={"flex"} alignItems={"center"}>
-          {location.pathname === "/" && (
-            <ButtonGroup size="small">
-              <Button
-                onClick={() => setView("Kanban")}
-                variant={view === "Kanban" ? "contained" : "outlined"}
-              >
-                <SpaceDashboardOutlinedIcon />
-              </Button>
-              <Button
-                onClick={() => setView("List")}
-                variant={view === "List" ? "contained" : "outlined"}
-              >
-                <ViewListOutlinedIcon />
-              </Button>
-            </ButtonGroup>
-          )}
-
-          <IconButton
-            size="large"
-            edge="end"
-            aria-label="account of current user"
-            aria-haspopup="true"
-            onClick={() => {
-              googleLogout();
-              localStorage.removeItem("x-app-token");
-              resetAuth();
-            }}
-            color="inherit"
+        <Stack direction={"row"} gap={2} alignItems={"center"}>
+          <Stack direction={"row"} alignItems={"center"}>
+            <Checkbox
+              defaultChecked
+              onChange={() => setMyOrderView((prev) => !prev)}
+            />
+            <Typography>Group by task list</Typography>
+          </Stack>
+          <Box>
+            {location.pathname === "/" && (
+              <ButtonGroup size="small">
+                <Button
+                  onClick={() => setView("Kanban")}
+                  variant={view === "Kanban" ? "contained" : "outlined"}
+                >
+                  <SpaceDashboardOutlinedIcon />
+                </Button>
+                <Button
+                  onClick={() => setView("List")}
+                  variant={view === "List" ? "contained" : "outlined"}
+                >
+                  <ViewListOutlinedIcon />
+                </Button>
+              </ButtonGroup>
+            )}
+          </Box>
+          <Select
+            id="demo-simple-select"
+            value={currentFilter}
+            label={currentFilter}
+            disabled={myOrderView}
+            onChange={(e) => setCurrentFilter(e.target.value)}
+            variant="outlined"
+            size="small"
           >
-            <LogoutOutlinedIcon />
-          </IconButton>
-        </Box>
+            {filterOptions.map((filter) => (
+              <MenuItem key={filter.id} value={filter.id}>
+                {filter.title}
+              </MenuItem>
+            ))}
+          </Select>
+          <Box>
+            <IconButton
+              size="large"
+              edge="end"
+              aria-label="account of current user"
+              aria-haspopup="true"
+              onClick={() => {
+                googleLogout();
+                localStorage.removeItem("x-app-token");
+                resetAuth();
+              }}
+              color="inherit"
+            >
+              <LogoutOutlinedIcon />
+            </IconButton>
+          </Box>
+        </Stack>
       </Toolbar>
     </AppBar>
   );
