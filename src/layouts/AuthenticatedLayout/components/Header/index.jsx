@@ -66,34 +66,19 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const filterOptions = [
-  {
-    title: "Today",
-    id: "today",
-  },
-  {
-    title: "Tomorrow",
-    id: "tomorrow",
-  },
-  {
-    title: "This Week",
-    id: "this-week",
-  },
-  {
-    title: "Next Week",
-    id: "next-week",
-  },
-  {
-    title: "Month",
-    id: "month",
-  },
-];
-
-const Header = ({ setOpenDrawer, view, setView }) => {
+const Header = ({
+  setOpenDrawer,
+  view,
+  setView,
+  filterOptions,
+  currentFilter,
+  setCurrentFilter,
+  myOrderView,
+  setMyOrderView,
+}) => {
   const { resetAuth } = useAuth();
   const location = useLocation();
-  const [currentFilter, setCurrentFilter] = useState(filterOptions[0].id);
-  const [myOrderView, setMyOrderView] = useState(true);
+
   return (
     <AppBar
       position="fixed"

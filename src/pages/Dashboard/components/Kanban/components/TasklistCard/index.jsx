@@ -17,7 +17,7 @@ import { styled } from "@mui/material/styles";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import useData from "../../../../../../hooks/useData";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import {
   useEditTasklistMutation,
   useRemoveTasklistMutation,
@@ -33,6 +33,7 @@ import AddTaskIcon from "@mui/icons-material/AddTask";
 import DeleteIcon from "@mui/icons-material/Delete";
 import NoTasks from "../../../../../../assets/no-tasks.png";
 import SubdirectoryArrowRightIcon from "@mui/icons-material/SubdirectoryArrowRight";
+import { useOutletContext } from "react-router-dom";
 
 const ITEM_HEIGHT = 48;
 
@@ -118,8 +119,8 @@ const TasklistCard = ({
   setCommonModalData,
   setTaskModalData,
 }) => {
+  const [, myOrderView] = useOutletContext();
   const { data, setData } = useData();
-
   const [expanded, setExpanded] = useState(false);
   const [taskIcon, setTaskIcon] = useState(null);
   const [loader, setLoader] = useState(false);
@@ -705,7 +706,7 @@ const TasklistCard = ({
           )}
 
           {!loader &&
-            tasklist.tasks
+            tasklist[myOrderView ? "tasks" : "AllTasks"]
               ?.filter((task) => !task.hidden)
               .map((task) => {
                 return (
