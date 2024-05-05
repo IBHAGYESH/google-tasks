@@ -5,7 +5,7 @@ const useAuth = () => {
   const { auth, setAuth } = useContext(AuthContext);
   const resetAuth = () => {
     setAuth({});
-    // localStorage.clear()
+    localStorage.clear();
   };
   return { auth, setAuth, resetAuth };
 };

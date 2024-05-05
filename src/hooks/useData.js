@@ -5,7 +5,6 @@ const useData = () => {
   const { data, setData } = useContext(DataContext);
   const resetData = () => {
     setData({});
-    // localStorage.clear()
   };
   return { data, setData, resetData };
 };

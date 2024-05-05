@@ -4,9 +4,6 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 // initialize an empty api service that we'll inject endpoints into later as needed
 
 const BASE_URL = "https://tasks.googleapis.com";
-// const BASE_URL = "http://localhost:8000";
-// const BASE_URL =
-//   "https://95a6-2405-201-2009-d891-443b-7b33-95e7-69d8.ngrok-free.app";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,

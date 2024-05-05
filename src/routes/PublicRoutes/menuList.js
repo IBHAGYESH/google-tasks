@@ -1,4 +1,4 @@
-export const ADMIN_SCOPE_ROUTES = {
+export const PUBLIC_ROUTES = {
   authentication: {
     basePath: "",
     actionPath: {

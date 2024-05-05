@@ -10,8 +10,6 @@ import useData from "../../hooks/useData";
 import { useGetTasklistsQuery } from "../../services/tasklists";
 import { useLazyGetTasksQuery } from "../../services/tasks";
 
-import GenericTasklistModal from "../../components/GenericTasklistModal";
-import GenericTaskModal from "../../components/GenericTaskModal";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 
@@ -105,17 +103,7 @@ const filterByDateRange = (data, range) => {
 
 const AuthenticatedLayout = () => {
   const { data, setData } = useData();
-  const [commonModalData, setCommonModalData] = useState({
-    open: false,
-    title: "",
-    prefilledData: "",
-    handleSubmit: () => {},
-  });
-  const [taskModalData, setTaskModalData] = useState({
-    open: false,
-    prefilledData: {},
-    handleSubmit: () => {},
-  });
+
   const [openDrawer, setOpenDrawer] = useState(true);
   const [view, setView] = useState("Kanban");
   const [currentFilter, setCurrentFilter] = useState(filterOptions[0].id);
@@ -233,34 +221,6 @@ const AuthenticatedLayout = () => {
 
   return (
     <Box sx={{ display: "flex" }}>
-      <GenericTaskModal
-        open={taskModalData.open}
-        prefilledData={taskModalData.prefilledData}
-        handleClose={() =>
-          setTaskModalData((prev) => {
-            return {
-              ...prev,
-              open: false,
-            };
-          })
-        }
-        handleSubmit={taskModalData.handleSubmit}
-        tasklists={data.tasklists}
-      />
-      <GenericTasklistModal
-        title={commonModalData.title}
-        open={commonModalData.open}
-        prefilledData={commonModalData.prefilledData}
-        handleClose={() =>
-          setCommonModalData((prev) => {
-            return {
-              ...prev,
-              open: false,
-            };
-          })
-        }
-        handleSubmit={commonModalData.handleSubmit}
-      />
       <Header
         setOpenDrawer={setOpenDrawer}
         view={view}
@@ -271,11 +231,7 @@ const AuthenticatedLayout = () => {
         myOrderView={myOrderView}
         setMyOrderView={setMyOrderView}
       />
-      <Sidebar
-        openDrawer={openDrawer}
-        setTaskModalData={setTaskModalData}
-        setCommonModalData={setCommonModalData}
-      />
+      <Sidebar openDrawer={openDrawer} />
       <Main
         open={openDrawer}
         sx={{

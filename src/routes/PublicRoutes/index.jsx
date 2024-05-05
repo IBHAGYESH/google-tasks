@@ -2,10 +2,8 @@ import { Navigate } from "react-router-dom";
 
 import LazyLoadComponent from "../../utils/LazyLoadComponent.jsx";
 import PublicLayout from "../../layouts/PublicLayout";
-import { ADMIN_SCOPE_ROUTES } from "./menuList.js";
+import { PUBLIC_ROUTES } from "./menuList.js";
 import { lazy } from "react";
-
-// const NotFound = React.lazy(() => import("../Pages/NotFound"));
 
 const Login = lazy(() => import("../../pages/Login"));
 
@@ -19,7 +17,7 @@ const PublicRoutes = [
         element: LazyLoadComponent(<Login />),
       },
       {
-        path: ADMIN_SCOPE_ROUTES.authentication.actionPath.login,
+        path: PUBLIC_ROUTES.authentication.actionPath.login,
         children: [{ index: true, element: LazyLoadComponent(<Login />) }],
       },
       {

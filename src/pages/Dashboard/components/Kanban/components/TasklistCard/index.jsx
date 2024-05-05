@@ -34,6 +34,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import NoTasks from "../../../../../../assets/no-tasks.png";
 import SubdirectoryArrowRightIcon from "@mui/icons-material/SubdirectoryArrowRight";
 import { useOutletContext } from "react-router-dom";
+import { useTaskModal } from "../../../../../../hooks/useTaskModal";
+import { useTasklistModal } from "../../../../../../hooks/useTasklistModal";
 
 const ITEM_HEIGHT = 48;
 
@@ -48,76 +50,13 @@ const ExpandMore = styled((props) => {
   }),
 }));
 
-const grid = 8;
-const drawerWidth = 240;
-
-// tasklist styles
-const getItemStyleTasklist = (isDragging, draggableStyle) => ({
-  // some basic styles to make the items look a bit nicer
-  userSelect: "none",
-  padding: grid * 2,
-  margin: `0 ${grid}px 0 0`,
-
-  // change background colour if dragging
-  // background: isDragging ? "#FF33BB" : "#E00096",
-
-  // styles we need to apply on draggables
-  ...draggableStyle,
-});
-
-// tasks styles
-const getListStyleTasks = (isDraggingOver) => ({
-  background: isDraggingOver ? "#C2E7FFF" : "#99D6FF",
-  //   display: "flex",
-  //   padding: grid,
-  // overflow: "auto",
-  //   height: "100%",
-  // width: "100%",
-});
-const getItemStyleTasks = (isDragging, draggableStyle) => ({
-  // some basic styles to make the items look a bit nicer
-  userSelect: "none",
-  padding: grid * 2,
-  margin: `0 ${grid}px 0 0`,
-
-  // change background colour if dragging
-  background: isDragging ? "#33ADFF" : "#0093F5",
-
-  // styles we need to apply on draggables
-  ...draggableStyle,
-});
-
-// subtasks styles
-const getListStyleSubTasks = (isDraggingOver) => ({
-  background: isDraggingOver ? "#E6FFD6F" : "#CDFFAD",
-  //   display: "flex",
-  //   padding: grid,
-  // overflow: "auto",
-  //   height: "100%",
-  // width: "100%",
-});
-const getItemStyleSubTasks = (isDragging, draggableStyle) => ({
-  // some basic styles to make the items look a bit nicer
-  userSelect: "none",
-  padding: grid * 2,
-  margin: `0 ${grid}px 0 0`,
-
-  // change background colour if dragging
-  background: isDragging ? "#9AFF5C" : "#81FF33",
-
-  // styles we need to apply on draggables
-  ...draggableStyle,
-});
-
 const TasklistCard = ({
+  tasklist,
   handleClose,
   handleClick,
   anchorEl,
   current,
   parent,
-  tasklist,
-  setCommonModalData,
-  setTaskModalData,
 }) => {
   const [, myOrderView] = useOutletContext();
   const { data, setData } = useData();
@@ -125,22 +64,21 @@ const TasklistCard = ({
   const [taskIcon, setTaskIcon] = useState(null);
   const [loader, setLoader] = useState(false);
 
-  const [addTask, { data: task, isLoading: addTaskLoading }] =
-    useAddTaskMutation();
+  const { setTaskModalConfigs, TaskModal } = useTaskModal();
+  const { setTasklistModalConfigs, TasklistModal } = useTasklistModal();
 
-  const [editTask, { data: editTaskData, isLoading: editTaskLoading }] =
-    useEditTaskMutation();
+  const [addTask, { isLoading: addTaskLoading }] = useAddTaskMutation();
 
-  const [deleteTask, { data: deleteTaskData, isLoading: deleteTaskLoading }] =
+  const [editTask, { isLoading: editTaskLoading }] = useEditTaskMutation();
+
+  const [deleteTask, { isLoading: deleteTaskLoading }] =
     useRemoveTaskMutation();
 
-  const [editTaskList, { data: editTasklist, isLoading: tasklistLoading }] =
+  const [editTaskList, { isLoading: tasklistLoading }] =
     useEditTasklistMutation();
 
-  const [
-    removeTaskList,
-    { data: removeTasklist, isLoading: removeTasklistLoading },
-  ] = useRemoveTasklistMutation();
+  const [removeTaskList, { isLoading: removeTasklistLoading }] =
+    useRemoveTasklistMutation();
 
   const markTaskAsCompleted = async (taskId, tasklistId) => {
     setLoader(true);
@@ -269,12 +207,12 @@ const TasklistCard = ({
     {
       title: "Rename list",
       action: () => {
-        setCommonModalData((prev) => {
+        setTasklistModalConfigs((prev) => {
           return {
             ...prev,
+            openModal: true,
             title: "Rename list",
-            open: true,
-            prefilledData: current.title,
+            prefilledData: { fieldValue: current.title },
             handleSubmit: async (name) => {
               setLoader(true);
               const tasklist = await editTaskList({
@@ -283,7 +221,6 @@ const TasklistCard = ({
                   title: name,
                 },
               });
-
               const tasklistDC = JSON.parse(JSON.stringify(data.tasklists));
               const ND = tasklistDC.map((tl) => {
                 if (tl.id === tasklist.data.id) {
@@ -291,13 +228,12 @@ const TasklistCard = ({
                 }
                 return tl;
               });
-
               setData((prev) => {
                 return { ...prev, tasklists: ND };
               });
               setLoader(false);
-              handleClose();
             },
+            handleClose: () => handleClose(),
           };
         });
       },
@@ -328,14 +264,14 @@ const TasklistCard = ({
       title: "Add a subtask",
       icon: <SubdirectoryArrowRightIcon />,
       action: () => {
-        setTaskModalData((prev) => {
+        setTaskModalConfigs((prev) => {
           return {
             ...prev,
-            open: true,
+            openModal: true,
+            lockTasklist: true,
             prefilledData: {
               current: current,
               parent: parent,
-              lockCurrent: true,
             },
             handleSubmit: async ({ title, notes, tasklist_id, parent }) => {
               setLoader(true);
@@ -349,7 +285,6 @@ const TasklistCard = ({
                   parent,
                 },
               });
-
               const tasklistDC = JSON.parse(JSON.stringify(data.tasklists));
               const ND = tasklistDC.map((tl) => {
                 if (tl.id === tasklist_id) {
@@ -372,13 +307,12 @@ const TasklistCard = ({
                 }
                 return tl;
               });
-
               setData((prev) => {
                 return { ...prev, tasklists: ND };
               });
               setLoader(false);
-              handleClose();
             },
+            handleClose: () => handleClose(),
           };
         });
       },
@@ -481,6 +415,8 @@ const TasklistCard = ({
 
   return (
     <>
+      {TaskModal}
+      {TasklistModal}
       {openTaskList && (
         <Menu
           anchorEl={anchorEl}
@@ -531,11 +467,9 @@ const TasklistCard = ({
         >
           {taskOptions.map((option) => {
             return (
-              <Stack direction={"row"}>
+              <Stack direction={"row"} key={option.title}>
                 {option.icon}
-                <MenuItem key={option.title} onClick={option.action}>
-                  {option.title}
-                </MenuItem>
+                <MenuItem onClick={option.action}>{option.title}</MenuItem>
               </Stack>
             );
           })}
@@ -558,11 +492,9 @@ const TasklistCard = ({
         >
           {subtaskOptions.map((option) => {
             return (
-              <Stack direction={"row"}>
+              <Stack direction={"row"} key={option.title}>
                 {option.icon}
-                <MenuItem key={option.title} onClick={option.action}>
-                  {option.title}
-                </MenuItem>
+                <MenuItem onClick={option.action}>{option.title}</MenuItem>
               </Stack>
             );
           })}
@@ -611,16 +543,15 @@ const TasklistCard = ({
                 },
               }}
               onClick={() => {
-                setTaskModalData((prev) => {
+                setTaskModalConfigs((prev) => {
                   return {
                     ...prev,
-                    open: true,
+                    openModal: true,
+                    lockTasklist: true,
                     prefilledData: {
                       current: tasklist,
-                      lockCurrent: true,
                     },
                     handleSubmit: async ({ title, notes, tasklist_id }) => {
-                      setLoader(true);
                       const { data: newTask } = await addTask({
                         tasklist_id: tasklist_id,
                         body: {
@@ -633,19 +564,14 @@ const TasklistCard = ({
                         JSON.stringify(data.tasklists)
                       );
                       const ND = tasklistDC.map((tl) => {
-                        if (tl.id === tasklist.id) {
+                        if (tl.id === tasklist_id) {
                           if (!newTask.parent) {
                             tl.tasks.unshift(newTask);
                             tl.AllTasks.unshift(newTask);
                           } else {
                             tl.tasks.forEach((task) => {
                               if (task.id === newTask.parent) {
-                                if (!task.subtasks) {
-                                  task.subtasks = [];
-                                  task.subtasks.unshift(newTask);
-                                } else {
-                                  task.subtasks.unshift(newTask);
-                                }
+                                task.subtasks.unshift(newTask);
                               }
                             });
                             tl.AllTasks.unshift(newTask);
@@ -657,13 +583,11 @@ const TasklistCard = ({
                       setData((prev) => {
                         return { ...prev, tasklists: ND };
                       });
-
-                      setLoader(false);
                     },
                   };
                 });
               }}
-              key={"add-task"}
+              key={`add-task-${tasklist.id}`}
             >
               <Typography variant="h6" color="rgb(26,115,232)">
                 <Stack direction={"row"} alignItems={"center"}>
