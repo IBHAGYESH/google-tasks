@@ -236,6 +236,7 @@ const TasklistCard = ({
             handleClose: () => handleClose(),
           };
         });
+        handleClose();
       },
     },
     {
@@ -315,6 +316,7 @@ const TasklistCard = ({
             handleClose: () => handleClose(),
           };
         });
+        handleClose();
       },
     },
     {
