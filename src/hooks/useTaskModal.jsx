@@ -39,10 +39,16 @@ export const useTaskModal = () => {
   });
 
   useEffect(() => {
-    if (!current && taskModalConfigs.prefilledData) {
+    if (!current && taskModalConfigs.prefilledData?.current) {
       setCurrent(taskModalConfigs.prefilledData.current.id);
     }
-  }, [current, taskModalConfigs.prefilledData]);
+    if (!title && taskModalConfigs.prefilledData?.title) {
+      setTitle(taskModalConfigs.prefilledData.title);
+    }
+    if (!notes && taskModalConfigs.prefilledData?.notes) {
+      setNotes(taskModalConfigs.prefilledData.notes);
+    }
+  }, [current, notes, taskModalConfigs.prefilledData, title]);
 
   const TaskModal = (
     <div>
@@ -114,7 +120,7 @@ export const useTaskModal = () => {
                     title: title,
                     notes: notes,
                     tasklist_id: current,
-                    parent: taskModalConfigs?.parent?.id,
+                    parent: taskModalConfigs?.prefilledData?.parent,
                   });
                   taskModalConfigs?.handleClose();
                   setTaskModalConfigs((prev) => ({

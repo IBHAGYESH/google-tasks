@@ -28,6 +28,7 @@ import {
   useRemoveTaskMutation,
 } from "../../../../../../services/tasks";
 import CheckIcon from "@mui/icons-material/Check";
+import EditIcon from "@mui/icons-material/Edit";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -262,6 +263,78 @@ const TasklistCard = ({
   ];
   const taskOptions = [
     {
+      title: "Edit",
+      icon: <EditIcon />,
+      action: () => {
+        setTaskModalConfigs((prev) => {
+          return {
+            ...prev,
+            openModal: true,
+            lockTasklist: true,
+            prefilledData: {
+              current: current,
+              parent: parent,
+              title: parent.title,
+              notes: parent.notes,
+            },
+            handleSubmit: async ({ title, notes, tasklist_id, parent }) => {
+              setLoader(true);
+              const { data: editedTask } = await editTask({
+                task_id: parent.id,
+                tasklist_id: tasklist_id,
+                body: {
+                  title,
+                  notes,
+                },
+              });
+
+              const tasklistDC = JSON.parse(JSON.stringify(data.tasklists));
+              const ND = tasklistDC.map((tl) => {
+                if (tl.id === tasklist_id) {
+                  if (!editedTask.parent) {
+                    tl.tasks = tl.tasks.map((task) => {
+                      if (task.id === editedTask.id) {
+                        task.title = editedTask.title;
+                        task.notes = editedTask.notes;
+                      }
+                      return task;
+                    });
+                  } else {
+                    tl.tasks.forEach((task) => {
+                      if (task.id === editedTask.parent) {
+                        task.subtasks = task.subtasks.map((task) => {
+                          if (task.id === editedTask.id) {
+                            task.title = editedTask.title;
+                            task.notes = editedTask.notes;
+                          }
+                          return task;
+                        });
+                      }
+                    });
+                  }
+                  tl.AllTasks = tl.AllTasks.map((task) => {
+                    if (task.id === editedTask.id) {
+                      task.title = editedTask.title;
+                      task.notes = editedTask.notes;
+                    }
+                    return task;
+                  });
+                }
+                return tl;
+              });
+
+              setData((prev) => {
+                return { ...prev, tasklists: ND };
+              });
+              setLoader(false);
+            },
+            handleClose: () => handleClose(),
+          };
+        });
+        handleClose();
+      },
+    },
+    {
       title: "Add a subtask",
       icon: <SubdirectoryArrowRightIcon />,
       action: () => {
@@ -283,7 +356,7 @@ const TasklistCard = ({
                   notes,
                 },
                 params: {
-                  parent,
+                  parent: parent.id,
                 },
               });
               const tasklistDC = JSON.parse(JSON.stringify(data.tasklists));
@@ -365,6 +438,78 @@ const TasklistCard = ({
     },
   ];
   const subtaskOptions = [
+    {
+      title: "Edit",
+      icon: <EditIcon />,
+      action: () => {
+        setTaskModalConfigs((prev) => {
+          return {
+            ...prev,
+            openModal: true,
+            lockTasklist: true,
+            prefilledData: {
+              current: current,
+              parent: parent,
+              title: parent.title,
+              notes: parent.notes,
+            },
+            handleSubmit: async ({ title, notes, tasklist_id, parent }) => {
+              setLoader(true);
+              const { data: editedTask } = await editTask({
+                task_id: parent.id,
+                tasklist_id: tasklist_id,
+                body: {
+                  title,
+                  notes,
+                },
+                params: {
+                  parent: parent.parent,
+                },
+              });
+
+              const tasklistDC = JSON.parse(JSON.stringify(data.tasklists));
+              const ND = tasklistDC.map((tl) => {
+                if (tl.id === tasklist_id) {
+                  if (!editedTask.parent) {
+                    tl.tasks = tl.tasks.map((task) => {
+                      if (task.id === editedTask.id) {
+                        task = editedTask;
+                      }
+                      return task;
+                    });
+                  } else {
+                    tl.tasks.forEach((task) => {
+                      if (task.id === editedTask.parent) {
+                        task.subtasks = task.subtasks.map((task) => {
+                          if (task.id === editedTask.id) {
+                            task = editedTask;
+                          }
+                          return task;
+                        });
+                      }
+                    });
+                  }
+                  tl.AllTasks = tl.AllTasks.map((task) => {
+                    if (task.id === editedTask.id) {
+                      task = editedTask;
+                    }
+                    return task;
+                  });
+                }
+                return tl;
+              });
+
+              setData((prev) => {
+                return { ...prev, tasklists: ND };
+              });
+              setLoader(false);
+            },
+            handleClose: () => handleClose(),
+          };
+        });
+        handleClose();
+      },
+    },
     {
       title: "Delete",
       icon: <DeleteIcon />,
@@ -737,7 +882,8 @@ const TasklistCard = ({
                                     onMouseEnter={() => setTaskIcon(subtask.id)}
                                     onMouseLeave={() => setTaskIcon(null)}
                                   >
-                                    {taskIcon === subtask.id ? (
+                                    {taskIcon === subtask.id ||
+                                    taskIcon === task.id ? (
                                       <CheckIcon color="info" />
                                     ) : (
                                       <RadioButtonUncheckedIcon />
